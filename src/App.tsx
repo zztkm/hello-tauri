@@ -1,9 +1,30 @@
 import { useState } from 'react'
 import logo from './logo.svg'
 import './App.css'
+import { invoke } from '@tauri-apps/api/tauri'
 
 function App() {
   const [count, setCount] = useState(0)
+
+  function executeCommands() {
+    invoke('simple_command')
+    invoke('command_with_message', { msg: 'ore tensai' }).then(message => {
+      console.log(`command_with_message`, message)
+    })
+    invoke('command_with_object', { msg: { field_str: 'ore kansai', field_u32: 12 } }).then(message => {
+      console.log(`command_with_object`, message)
+    })
+    for (let arg of [1, 2]) {
+      invoke('command_with_error', { arg }).then(message => {
+        console.log('command_with_error', message)
+      }).catch(message => {
+        console.error('command_with_error', message)
+      })
+    }
+    invoke('async_command', { arg: 14 }).then(message => {
+      console.log(`async_command`, message)
+    })
+  }
 
   return (
     <div className="App">
@@ -15,28 +36,7 @@ function App() {
             count is: {count}
           </button>
         </p>
-        <p>
-          Edit <code>App.tsx</code> and save to test HMR updates.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          {' | '}
-          <a
-            className="App-link"
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
-        </p>
+        <button onClick={executeCommands}>Click to execute command</button>
       </header>
     </div>
   )
